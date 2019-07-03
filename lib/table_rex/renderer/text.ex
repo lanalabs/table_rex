@@ -164,8 +164,7 @@ defmodule TableRex.Renderer.Text do
         {%{cell | color: color}, col_index}
       end)
       |> Enum.map(&render_cell(table, meta, row_index, &1))
-      |> Enum.zip()
-      |> Enum.map(&Tuple.to_list/1)
+      |> column_cells_to_rows()
       |> Enum.map(&Enum.intersperse(&1, opts[:top_intersection_symbol]))
       |> Enum.map(&Enum.join(&1))
       |> Enum.map(&String.replace(&1, " ", opts[:header_separator_symbol]))
@@ -193,8 +192,7 @@ defmodule TableRex.Renderer.Text do
           {%{cell | color: color}, col_index}
         end)
         |> Enum.map(&render_cell(table, meta, row_index, &1))
-        |> Enum.zip()
-        |> Enum.map(&Tuple.to_list/1)
+        |> column_cells_to_rows()
         |> Enum.map(&Enum.intersperse(&1, opts[:vertical_symbol]))
       end)
       |> (&(if opts[:row_seperator] do
@@ -209,6 +207,33 @@ defmodule TableRex.Renderer.Text do
     {table, meta, opts, rendered ++ lines}
   end
 
+  @doc """
+  Transforms
+  ```elixir
+  [
+    ["         Keaton & Hive! ", "                        ", "                        "],
+    ["     The Plague     ", "       hello        ", "       world        "],
+    [" 2003         ", "              ", "              "]
+  ]
+  ```
+
+  into
+
+  ```elixir
+  [
+    ["         Keaton & Hive! ", "     The Plague     ", " 2003         "],
+    ["                        ", "       hello        ", "              "],
+    ["                        ", "       world        ", "              "]
+  ]
+  ```
+  """
+  defp column_cells_to_rows(cell_lines) do
+    cell_lines
+    |> Enum.zip()
+    |> Enum.map(&Tuple.to_list/1)
+  end
+
+  @spec render_cell(Table.t(), Meta.t(), integer(), {Cell.t(), integer()}) :: list(String.t())
   defp render_cell(%Table{} = table, %Meta{} = meta, row_index, {%Cell{} = cell, col_index}) do
     col_width = Meta.col_width(meta, col_index)
     row_height = Meta.row_height(meta, row_index)
