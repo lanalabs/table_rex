@@ -11,7 +11,7 @@ defmodule TableRex.Renderer.Text do
   @doc """
   Provides a level of sane defaults for the Text rendering module.
 
-  Defaults:
+  Example with color function:
 
   ```elixir
       %{
@@ -119,7 +119,6 @@ defmodule TableRex.Renderer.Text do
   """
   def render(table = %Table{}, opts) do
     {col_widths, row_heights} = max_dimensions(table)
-
     # Calculations that would otherwise be carried out multiple times are done once and their
     # results are stored in the %Meta{} struct which is then passed through the pipeline.
     table_width = table_width(col_widths)
@@ -158,6 +157,9 @@ defmodule TableRex.Renderer.Text do
 
     header =
       header_row
+      |> Enum.map(fn cell ->
+        %{cell | rendered_value: String.replace(cell.rendered_value, "\n", "\\n")}
+      end)
       |> Enum.with_index()
       |> Enum.map(fn {cell, col_index} ->
         color = opts[:header_color_function].(col_index) || cell.color
@@ -207,34 +209,34 @@ defmodule TableRex.Renderer.Text do
     {table, meta, opts, rendered ++ lines}
   end
 
-  @doc """
-  Transforms
-  ```elixir
-  [
-    ["         Keaton & Hive! ", "                        ", "                        "],
-    ["     The Plague     ", "       hello        ", "       world        "],
-    [" 2003         ", "              ", "              "]
-  ]
-  ```
-
-  into
-
-  ```elixir
-  [
-    ["         Keaton & Hive! ", "     The Plague     ", " 2003         "],
-    ["                        ", "       hello        ", "              "],
-    ["                        ", "       world        ", "              "]
-  ]
-  ```
-  """
+  # Transforms
+  # ```elixir
+  # [
+  #   ["         Keaton & Hive! ", "                        ", "                        "],
+  #   ["     The Plague     ", "       hello        ", "       world        "],
+  #   [" 2003         ", "              ", "              "]
+  # ]
+  # ```
+  # into
+  # ```elixir
+  # [
+  #   ["         Keaton & Hive! ", "     The Plague     ", " 2003         "],
+  #   ["                        ", "       hello        ", "              "],
+  #   ["                        ", "       world        ", "              "]
+  # ]
+  # ```
   defp column_cells_to_rows(cell_lines) do
     cell_lines
     |> Enum.zip()
     |> Enum.map(&Tuple.to_list/1)
   end
 
-  @spec render_cell(Table.t(), Meta.t(), integer(), {Cell.t(), integer()}) :: list(String.t())
-  defp render_cell(%Table{} = table, %Meta{} = meta, row_index, {%Cell{} = cell, col_index}) do
+  defp render_cell(
+         %Table{} = table,
+         %Meta{} = meta,
+         row_index,
+         {%Cell{} = cell, col_index}
+       ) do
     col_width = Meta.col_width(meta, col_index)
     row_height = Meta.row_height(meta, row_index)
     col_padding = Table.get_column_meta(table, col_index, :padding)
@@ -344,17 +346,23 @@ defmodule TableRex.Renderer.Text do
          row_index
        ) do
     padding = Table.get_column_meta(table, col_index, :padding)
-    {width, height} = content_dimensions(cell.rendered_value, padding)
+    is_header = row_index == -1
+    {width, height} = content_dimensions(cell.rendered_value, padding, is_header)
     col_widths = Map.update(col_widths, col_index, width, &Enum.max([&1, width]))
     row_heights = Map.update(row_heights, row_index, height, &Enum.max([&1, height]))
     {col_widths, row_heights}
   end
 
-  defp content_dimensions(value, padding) when is_binary(value) and is_number(padding) do
+  defp content_dimensions(value, padding, is_header)
+       when is_binary(value) and is_number(padding) do
     lines =
-      value
-      |> strip_ansi_color_codes()
-      |> String.split("\n")
+      if is_header do
+        [strip_ansi_color_codes(value)]
+      else
+        value
+        |> strip_ansi_color_codes()
+        |> String.split("\n")
+      end
 
     height = Enum.count(lines)
     width = Enum.map(lines, &String.length(&1)) |> Enum.max()

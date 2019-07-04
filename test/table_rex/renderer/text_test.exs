@@ -4,7 +4,7 @@ defmodule TableRex.Renderer.TextTest do
 
   setup do
     title = "Renegade Hardware Releases"
-    header = ["Artist", "Track", "Year\nDate"]
+    header = ["Artist", "Track", "Year"]
 
     rows = [
       ["Konflict", "Cyanide", 1999],
@@ -32,7 +32,6 @@ defmodule TableRex.Renderer.TextTest do
 
     assert rendered == """
            ├─Artist───┼─Track───┼─Year───┤
-           ├──────────┼─────────┼─Date───┤
            └──────────┴─────────┴────────┘
            """
   end
@@ -42,7 +41,6 @@ defmodule TableRex.Renderer.TextTest do
 
     assert rendered == """
            ├─Artist─────────┼─Track──────┼─Year─┤
-           ├────────────────┼────────────┼─Date─┤
            │ Konflict       │ Cyanide    │ 1999 │
            │ Keaton & Hive! │ The Plague │ 2003 │
            │                │ hello      │      │
@@ -54,12 +52,12 @@ defmodule TableRex.Renderer.TextTest do
            """
   end
 
+  @tag :active
   test "default render", %{table: table, opts: opts} do
     {:ok, rendered} = Table.render(table, opts)
 
     assert rendered == """
            ├─Artist─────────┼─Track──────┼─Year─┤
-           ├────────────────┼────────────┼─Date─┤
            │ Konflict       │ Cyanide    │ 1999 │
            │────────────────┼────────────┼──────│
            │ Keaton & Hive! │ The Plague │ 2003 │
@@ -81,7 +79,6 @@ defmodule TableRex.Renderer.TextTest do
 
     assert rendered == """
            ├─Artist─────────┼─Track──────┼─Year─┤
-           ├────────────────┼────────────┼─Date─┤
            │ Konflict       │ Cyanide    │ 1999 │
            │────────────────┼────────────┼──────│
            │ Keaton & Hive! │ The Plague │ 2003 │
@@ -144,7 +141,6 @@ defmodule TableRex.Renderer.TextTest do
 
     assert rendered == """
            ├─Artist─────────┼─Track──────┼─Year─┤
-           ├────────────────┼────────────┼─Date─┤
            │ Keaton & Hive! │ The Plague │ 2003 │
            │                │ hello      │      │
            │                │ hello      │      │
@@ -166,7 +162,6 @@ defmodule TableRex.Renderer.TextTest do
 
     assert rendered == """
            ├─Artist─────────┼─Track──────┼─Year─┤
-           ├────────────────┼────────────┼─Date─┤
            │ Vicious Circle │ Welcome To │ 2007 │
            │                │ Shanktown  │      │
            │────────────────┼────────────┼──────│
@@ -188,7 +183,6 @@ defmodule TableRex.Renderer.TextTest do
 
     assert rendered == """
            ├─Artist─────────┼─Track──────┼─Year─┤
-           ├────────────────┼────────────┼─Date─┤
            │ Konflict       │ Cyanide    │ 1999 │
            │────────────────┼────────────┼──────│
            │ Keaton & Hive! │ The Plague │ 2003 │
@@ -211,7 +205,6 @@ defmodule TableRex.Renderer.TextTest do
     assert rendered ==
              """
              ├─Artist─────────┼─Track──────┼─Year─┤
-             ├────────────────┼────────────┼─Date─┤
              │ Vicious Circle │ Welcome To │ 2007 │
              │                │ Shanktown  │      │
              │────────────────┼────────────┼──────│
@@ -233,7 +226,6 @@ defmodule TableRex.Renderer.TextTest do
 
     assert rendered == """
            ├=Artist=========┼=Track======┼=Year=┤
-           ├================┼============┼=Date=┤
            │ Konflict       │ Cyanide    │ 1999 │
            │────────────────┼────────────┼──────│
            │ Keaton & Hive! │ The Plague │ 2003 │
@@ -256,7 +248,6 @@ defmodule TableRex.Renderer.TextTest do
 
     assert rendered == """
            ├─────Artist─────┼──────Track─┼─Year─┤
-           ├────────────────┼────────────┼─Date─┤
            │    Konflict    │    Cyanide │ 1999 │
            │────────────────┼────────────┼──────│
            │ Keaton & Hive! │ The Plague │ 2003 │
@@ -276,7 +267,6 @@ defmodule TableRex.Renderer.TextTest do
 
     assert rendered == """
            ├─Artist─────────┼─Track──────┼─Year─┤
-           ├────────────────┼────────────┼─Date─┤
            │ Konflict       │ Cyanide    │ 1999 │
            │────────────────┼────────────┼──────│
            │ Keaton & Hive! │ The Plague │ 2003 │
@@ -298,7 +288,6 @@ defmodule TableRex.Renderer.TextTest do
 
     assert rendered == """
            ├───Artist───────────┼───Track────────┼───Year───┤
-           ├────────────────────┼────────────────┼───Date───┤
            │   Konflict         │   Cyanide      │   1999   │
            │────────────────────┼────────────────┼──────────│
            │   Keaton & Hive!   │   The Plague   │   2003   │
@@ -321,7 +310,6 @@ defmodule TableRex.Renderer.TextTest do
 
     assert rendered == """
            ├───────Artist───────┼────────Track───┼───Year───┤
-           ├────────────────────┼────────────────┼───Date───┤
            │      Konflict      │      Cyanide   │   1999   │
            │────────────────────┼────────────────┼──────────│
            │   Keaton & Hive!   │   The Plague   │   2003   │
@@ -335,7 +323,6 @@ defmodule TableRex.Renderer.TextTest do
            """
   end
 
-  @tag :active
   test "default render with added color using a named ANSI sequence", %{table: table, opts: opts} do
     {:ok, rendered} =
       table
@@ -344,7 +331,6 @@ defmodule TableRex.Renderer.TextTest do
 
     assert rendered == """
            ├─Artist─────────┼\e[31m─Track──────\e[0m┼─Year─┤
-           ├────────────────┼\e[31m────────────\e[0m┼─Date─┤
            │ Konflict       │\e[31m Cyanide    \e[0m│ 1999 │
            │────────────────┼────────────┼──────│
            │ Keaton & Hive! │\e[31m The Plague \e[0m│ 2003 │
@@ -369,7 +355,6 @@ defmodule TableRex.Renderer.TextTest do
 
     assert rendered == """
            ├─Artist─────────┼\e[31m─Track──────\e[0m┼─Year─┤
-           ├────────────────┼\e[31m────────────\e[0m┼─Date─┤
            │ Konflict       │\e[31m Cyanide    \e[0m│ 1999 │
            │────────────────┼────────────┼──────│
            │ Keaton & Hive! │\e[31m The Plague \e[0m│ 2003 │
@@ -394,7 +379,6 @@ defmodule TableRex.Renderer.TextTest do
 
     assert rendered == """
            ├─Artist─────────┼\e[48;5;30m\e[37m─Track──────\e[0m┼─Year─┤
-           ├────────────────┼\e[48;5;30m\e[37m────────────\e[0m┼─Date─┤
            │ Konflict       │\e[48;5;30m\e[37m Cyanide    \e[0m│ 1999 │
            │────────────────┼────────────┼──────│
            │ Keaton & Hive! │\e[48;5;30m\e[37m The Plague \e[0m│ 2003 │
@@ -419,7 +403,6 @@ defmodule TableRex.Renderer.TextTest do
 
     assert rendered == """
            ├───Artist───────────┼───Track────────┼───Year───┤
-           ├────────────────────┼────────────────┼───Date───┤
            │   Konflict         │   Cyanide      │   1999   │
            │────────────────────┼────────────────┼──────────│
            │   Keaton & Hive!   │   The Plague   │   2003   │
@@ -441,7 +424,6 @@ defmodule TableRex.Renderer.TextTest do
 
     assert rendered == """
            ├Artist────────┼Track─────┼Year┤
-           ├──────────────┼──────────┼Date┤
            │Konflict      │Cyanide   │1999│
            │──────────────┼──────────┼────│
            │Keaton & Hive!│The Plague│2003│
@@ -463,7 +445,6 @@ defmodule TableRex.Renderer.TextTest do
 
     assert rendered == """
            ├─────Artist─────┼───Track────┼─Year─┤
-           ├────────────────┼────────────┼─Date─┤
            │    Konflict    │  Cyanide   │ 1999 │
            │────────────────┼────────────┼──────│
            │ Keaton & Hive! │ The Plague │ 2003 │
@@ -489,7 +470,6 @@ defmodule TableRex.Renderer.TextTest do
 
     assert rendered == """
            ├─────Artist─────┼──────Track─┼─Year─┤
-           ├────────────────┼────────────┼─Date─┤
            │    Konflict    │    Cyanide │ 1999 │
            │────────────────┼────────────┼──────│
            │ Keaton & Hive! │ The Plague │ 2003 │
@@ -513,7 +493,6 @@ defmodule TableRex.Renderer.TextTest do
 
     assert rendered == """
            ├─────────Artist─┼──────Track─┼─Year─┤
-           ├────────────────┼────────────┼─Date─┤
            │    Konflict    │    Cyanide │ 1999 │
            │────────────────┼────────────┼──────│
            │ Keaton & Hive! │ The Plague │ 2003 │
@@ -538,7 +517,6 @@ defmodule TableRex.Renderer.TextTest do
 
     assert rendered == """
            ├─Artist─────────┼─Track──────┼─Year─┤
-           ├────────────────┼────────────┼─Date─┤
            │ Konflict       │ Cyanide    │ 1999 │
            │────────────────┼────────────┼──────│
            │ Keaton & Hive! │\e[31m The Plague \e[0m│ 2003 │
@@ -563,7 +541,6 @@ defmodule TableRex.Renderer.TextTest do
 
     assert rendered == """
            ├─Artist─────────┼─Track──────┼─Year─┤
-           ├────────────────┼────────────┼─Date─┤
            │ Konflict       │ Cyanide    │ 1999 │
            │────────────────┼────────────┼──────│
            │ Keaton & Hive! │\e[31m The Plague \e[0m│ 2003 │
@@ -588,7 +565,6 @@ defmodule TableRex.Renderer.TextTest do
 
     assert rendered == """
            ├─Artist─────────┼─Track──────┼─Year─┤
-           ├────────────────┼────────────┼─Date─┤
            │ Konflict       │ Cyanide    │ 1999 │
            │────────────────┼────────────┼──────│
            │ Keaton & Hive! │\e[48;5;30m\e[37m The Plague \e[0m│ 2003 │
@@ -611,7 +587,6 @@ defmodule TableRex.Renderer.TextTest do
 
     assert rendered == """
            ├─────Artist─────┼──────Track─┼─Year─┤
-           ├────────────────┼────────────┼─Date─┤
            │ Konflict       │ Cyanide    │ 1999 │
            │────────────────┼────────────┼──────│
            │ Keaton & Hive! │ The Plague │ 2003 │
@@ -634,7 +609,6 @@ defmodule TableRex.Renderer.TextTest do
 
     assert rendered == """
            ├\e[31m─Artist─────────\e[0m┼\e[34m─Track──────\e[0m┼─Year─┤
-           ├\e[31m────────────────\e[0m┼\e[34m────────────\e[0m┼─Date─┤
            │ Konflict       │ Cyanide    │ 1999 │
            │────────────────┼────────────┼──────│
            │ Keaton & Hive! │ The Plague │ 2003 │
@@ -648,7 +622,6 @@ defmodule TableRex.Renderer.TextTest do
            """
   end
 
-  @tag :active
   test "default render with set column meta color across all columns and specific header override",
        %{table: table, opts: opts} do
     {:ok, rendered} =
@@ -659,7 +632,6 @@ defmodule TableRex.Renderer.TextTest do
 
     assert rendered == """
            ├─Artist─────────┼\e[34m─Track──────\e[0m┼─Year─┤
-           ├────────────────┼\e[34m────────────\e[0m┼─Date─┤
            │ Konflict       │\e[31m Cyanide    \e[0m│ 1999 │
            │────────────────┼────────────┼──────│
            │ Keaton & Hive! │\e[31m The Plague \e[0m│ 2003 │
@@ -685,7 +657,6 @@ defmodule TableRex.Renderer.TextTest do
 
     assert rendered == """
            ├─Artist─────────┼\e[0m─Track──────\e[0m┼─Year─┤
-           ├────────────────┼\e[0m────────────\e[0m┼─Date─┤
            │ Konflict       │\e[31m Cyanide    \e[0m│ 1999 │
            │────────────────┼────────────┼──────│
            │ Keaton & Hive! │\e[31m The Plague \e[0m│ 2003 │
@@ -710,7 +681,6 @@ defmodule TableRex.Renderer.TextTest do
 
     assert rendered == """
            ├─Artist────────────┼─Track─────────┼─Year────┤
-           ├───────────────────┼───────────────┼─Date────┤
            │ Konflict          │ Cyanide       │ 1999    │
            │───────────────────┼───────────────┼─────────│
            │ Keaton & Hive!    │ The Plague    │ 2003    │
@@ -735,7 +705,6 @@ defmodule TableRex.Renderer.TextTest do
 
     assert rendered == """
            ├─Artist─────────────┼─Track──────────┼─Year─────┤
-           ├────────────────────┼────────────────┼─Date─────┤
            │ Konflict           │ Cyanide        │ 1999     │
            │────────────────────┼────────────────┼──────────│
            │ Keaton & Hive!     │ The Plague     │ 2003     │
@@ -760,7 +729,6 @@ defmodule TableRex.Renderer.TextTest do
 
     assert rendered == """
            ├─Artist─────────────┼─Track──────────┼─Year─────┤
-           ├────────────────────┼────────────────┼─Date─────┤
            │ Konflict           │ Cyanide        │ 1999     │
            │────────────────────┼────────────────┼──────────│
            │ Keaton & Hive!     │ The Plague     │ 2003     │
@@ -785,7 +753,6 @@ defmodule TableRex.Renderer.TextTest do
 
     assert rendered == """
            ├─Artist─────────────────┼─Track──────────────┼─Year─────────┤
-           ├────────────────────────┼────────────────────┼─Date─────────┤
            │ Konflict               │ Cyanide            │ 1999         │
            │────────────────────────┼────────────────────┼──────────────│
            │ Keaton & Hive!         │ The Plague         │ 2003         │
@@ -810,7 +777,6 @@ defmodule TableRex.Renderer.TextTest do
 
     assert rendered == """
            ├─────────────────Artist─┼───────Track────────┼─Year─────────┤
-           ├────────────────────────┼────────────────────┼─Date─────────┤
            │               Konflict │      Cyanide       │ 1999         │
            │────────────────────────┼────────────────────┼──────────────│
            │         Keaton & Hive! │     The Plague     │ 2003         │
@@ -833,7 +799,6 @@ defmodule TableRex.Renderer.TextTest do
 
     assert rendered == """
            ├─Artist───────────────┼─Track────────────┼─Year───────┤
-           ├──────────────────────┼──────────────────┼─Date───────┤
            │ Konflict             │ Cyanide          │ 1999       │
            │──────────────────────┼──────────────────┼────────────│
            │ Keaton & Hive!       │ The Plague       │ 2003       │
@@ -941,7 +906,6 @@ defmodule TableRex.Renderer.TextTest do
 
     assert rendered == """
            ├Artist─────────────────┼Track──────────────┼─Year──────────┤
-           ├───────────────────────┼───────────────────┼─Date──────────┤
            │Konflict               │Cyanide            │ 1999          │
            │───────────────────────┼───────────────────┼───────────────│
            │Keaton & Hive!         │The Plague         │ 2003          │
