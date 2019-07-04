@@ -106,10 +106,9 @@ defmodule TableRex.Table do
   def put_cell_meta(%Table{} = table, col_index, row_index, cell_meta)
       when is_integer(col_index) and is_integer(row_index) and is_list(cell_meta) do
     cell_meta = cell_meta |> Enum.into(%{})
-    inverse_row_index = -(row_index + 1)
 
     rows =
-      List.update_at(table.rows, inverse_row_index, fn row ->
+      List.update_at(table.rows, row_index, fn row ->
         List.update_at(row, col_index, &Map.merge(&1, cell_meta))
       end)
 
@@ -137,7 +136,7 @@ defmodule TableRex.Table do
   @spec add_row(Table.t(), list) :: Table.t()
   def add_row(%Table{} = table, row) when is_list(row) do
     new_row = Enum.map(row, &Cell.to_cell(&1))
-    %Table{table | rows: [new_row | table.rows]}
+    %Table{table | rows: table.rows ++ [new_row]}
   end
 
   @doc """
@@ -147,12 +146,11 @@ defmodule TableRex.Table do
   def add_rows(%Table{} = table, rows) when is_list(rows) do
     rows =
       rows
-      |> Enum.reverse()
       |> Enum.map(fn row ->
         Enum.map(row, &Cell.to_cell(&1))
       end)
 
-    %Table{table | rows: rows ++ table.rows}
+    %Table{table | rows: table.rows ++ rows}
   end
 
   @doc """
@@ -212,9 +210,9 @@ defmodule TableRex.Table do
       %{raw_value: next_value} = Enum.at(next, column_index)
 
       if order == :desc do
-        next_value > prev_value
-      else
         next_value < prev_value
+      else
+        next_value > prev_value
       end
     end
   end
@@ -273,11 +271,7 @@ defmodule TableRex.Table do
     {renderer, opts} = Keyword.pop(opts, :renderer, @default_renderer)
     opts = opts |> Enum.into(renderer.default_options)
 
-    if Table.has_rows?(table) do
-      renderer.render(table, opts)
-    else
-      {:error, "Table must have at least one row before being rendered"}
-    end
+    renderer.render(table, opts)
   end
 
   @doc """
