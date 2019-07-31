@@ -137,11 +137,10 @@ defmodule TableRex.Renderer.Text do
         color = opts[:header_color_function].(col_index) || cell.color
         {%{cell | color: color}, col_index}
       end)
-      |> Enum.map(&render_cell(table, meta, row_index, &1))
+      |> Enum.map(&render_cell(table, meta, row_index, &1, opts[:header_separator_symbol]))
       |> column_cells_to_rows()
       |> Enum.map(&Enum.intersperse(&1, opts[:top_intersection_symbol]))
       |> Enum.map(&Enum.join(&1))
-      |> Enum.map(&String.replace(&1, " ", opts[:header_separator_symbol]))
       |> Enum.map(&(opts[:top_left_corner_symbol] <> &1 <> opts[:top_right_corner_symbol]))
 
     {table, meta, opts, header ++ rendered}
@@ -165,7 +164,7 @@ defmodule TableRex.Renderer.Text do
           color = opts[:table_color_function].(row_index, col_index) || cell.color
           {%{cell | color: color}, col_index}
         end)
-        |> Enum.map(&render_cell(table, meta, row_index, &1))
+        |> Enum.map(&render_cell(table, meta, row_index, &1, " "))
         |> column_cells_to_rows()
         |> Enum.map(&Enum.intersperse(&1, opts[:vertical_symbol]))
       end)
@@ -207,8 +206,10 @@ defmodule TableRex.Renderer.Text do
          %Table{} = table,
          %Meta{} = meta,
          row_index,
-         {%Cell{} = cell, col_index}
-       ) do
+         {%Cell{} = cell, col_index},
+         space_filler
+       )
+       when is_binary(space_filler) do
     col_width = Meta.col_width(meta, col_index)
     row_height = Meta.row_height(meta, row_index)
     col_padding = Table.get_column_meta(table, col_index, :padding)
@@ -217,26 +218,30 @@ defmodule TableRex.Renderer.Text do
 
     cell.rendered_value
     |> String.split("\n")
-    |> add_height_padding(col_width, row_height, col_padding)
-    |> Enum.map(&do_render_cell(&1, col_width, col_padding, align: cell_align))
+    |> add_height_padding(col_width, row_height, col_padding, space_filler)
+    |> Enum.map(&do_render_cell(&1, col_width, col_padding, space_filler, align: cell_align))
     |> Enum.map(&format_with_color(&1, cell_color))
   end
 
-  defp add_height_padding(lines, inner_width, row_height, col_padding)
+  defp add_height_padding(lines, inner_width, row_height, col_padding, space_filler)
        when is_list(lines) and is_integer(row_height) and is_integer(inner_width) do
-    empty_line = String.duplicate(" ", inner_width - col_padding)
+    empty_line = String.duplicate(space_filler, inner_width - col_padding)
     empty_height_padding = List.duplicate(empty_line, max(0, row_height - length(lines)))
     lines ++ empty_height_padding
   end
 
-  defp do_render_cell(value, inner_width, _padding, align: :center) do
+  defp do_render_cell(value, inner_width, _padding, space_filler, align: :center)
+       when is_binary(space_filler) do
     value_len = String.length(strip_ansi_color_codes(value))
     post_value = ((inner_width - value_len) / 2) |> round
     pre_value = inner_width - (post_value + value_len)
-    String.duplicate(" ", pre_value) <> value <> String.duplicate(" ", post_value)
+
+    String.duplicate(space_filler, pre_value) <>
+      value <> String.duplicate(space_filler, post_value)
   end
 
-  defp do_render_cell(value, inner_width, padding, align: align) do
+  defp do_render_cell(value, inner_width, padding, space_filler, align: align)
+       when is_binary(space_filler) do
     value_len = String.length(strip_ansi_color_codes(value))
     alt_side_padding = inner_width - value_len - padding
 
@@ -249,7 +254,8 @@ defmodule TableRex.Renderer.Text do
           {alt_side_padding, padding}
       end
 
-    String.duplicate(" ", pre_value) <> value <> String.duplicate(" ", post_value)
+    String.duplicate(space_filler, pre_value) <>
+      value <> String.duplicate(space_filler, post_value)
   end
 
   defp render_bottom_frame({%Table{} = table, %Meta{} = meta, opts, rendered}) do

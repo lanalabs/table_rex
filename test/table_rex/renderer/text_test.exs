@@ -52,7 +52,6 @@ defmodule TableRex.Renderer.TextTest do
            """
   end
 
-  @tag :active
   test "default render", %{table: table, opts: opts} do
     {:ok, rendered} = Table.render(table, opts)
 
@@ -813,7 +812,7 @@ defmodule TableRex.Renderer.TextTest do
   end
 
   test "default render with title exactly matching combined column widths when only 2 columns", %{
-    table: table,
+    table: _table,
     opts: opts
   } do
     title = "Renegade Hardware Releases Shown Here"
@@ -841,7 +840,7 @@ defmodule TableRex.Renderer.TextTest do
   end
 
   test "default render with title exceeding combined column widths by 1 character when only 2 columns",
-       %{table: table, opts: opts} do
+       %{table: _table, opts: opts} do
     title = "Renegade Hardware Releases Shown Here!"
     header = ["Artist", "Track"]
 
@@ -867,7 +866,7 @@ defmodule TableRex.Renderer.TextTest do
   end
 
   test "default render with individual cells containing ANSI color codes", %{
-    table: table,
+    table: _table,
     opts: opts
   } do
     title = "Renegade Hardware Releases"
@@ -916,6 +915,44 @@ defmodule TableRex.Renderer.TextTest do
            │Vicious Circle         │Welcome To         │ 2007          │
            │                       │Shanktown          │               │
            └───────────────────────┴───────────────────┴───────────────┘
+           """
+  end
+
+  test "render spaces in header without filling" do
+    header = ["Artist Name", "Track", "Year"]
+
+    rows = [
+      ["Konflict", "Cyanide", 1999],
+      [
+        "Keaton & Hive!",
+        "The Plague\nhello\nhello\nworld",
+        2003
+      ],
+      ["Vicious Circle", "Welcome To\nShanktown", 2007]
+    ]
+
+    opts = [
+      header_color_function: fn _ -> nil end,
+      table_color_function: fn _, _ -> nil end,
+      row_seperator: true
+    ]
+
+    {:ok, rendered} =
+      Table.new(rows, header)
+      |> Table.render(opts)
+
+    assert rendered == """
+           ├─Artist Name────┼─Track──────┼─Year─┤
+           │ Konflict       │ Cyanide    │ 1999 │
+           │────────────────┼────────────┼──────│
+           │ Keaton & Hive! │ The Plague │ 2003 │
+           │                │ hello      │      │
+           │                │ hello      │      │
+           │                │ world      │      │
+           │────────────────┼────────────┼──────│
+           │ Vicious Circle │ Welcome To │ 2007 │
+           │                │ Shanktown  │      │
+           └────────────────┴────────────┴──────┘
            """
   end
 end

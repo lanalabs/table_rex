@@ -4,7 +4,7 @@ defmodule TableRex.Renderer.Text.Meta do
   of style & dimension calculations to be passed down the render pipeline.
   """
   alias TableRex.Renderer.Text.Meta
-  
+
   defstruct col_widths: %{},
             row_heights: %{},
             table_width: 0,
